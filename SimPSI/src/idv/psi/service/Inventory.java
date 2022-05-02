@@ -2,12 +2,10 @@ package idv.psi.service;
 
 import idv.psi.model.Order;
 import idv.psi.model.Product;
-import idv.psi.model.ProductItem;
 
 public class Inventory {
 
 	private static Product[] products;
-	private static int[] productQuantity;//產品存量
 
 	private Inventory() {
 
@@ -15,7 +13,6 @@ public class Inventory {
 
 	public static void initialize(Integer maxProductsCount) {
 		products = new Product[maxProductsCount];
-		productQuantity = new int[maxProductsCount];
 	}
 
 	//product id = products 的 index+1
@@ -23,14 +20,33 @@ public class Inventory {
 		return productID - 1;
 	}
 
-	public static void setProduct(Product product, int quantity) {
+	public static void setProduct(Product product) {
 		int index = getIndexWithProductID(product.getId());
 		products[index] = product;
-		productQuantity[index] = quantity;
 	}
 
+	public static Product getProduct(int productID) {
+		return Inventory.products[getIndexWithProductID(productID)];
+	}
+
+	//取得原型
+	public static Product getProductCopy(int productID) {
+		Product invProduct = Inventory.products[getIndexWithProductID(
+				productID)];
+		//原型
+		Product p;
+		{
+			p = new Product();
+			p.setName(invProduct.getName());
+			p.setId(productID);
+			p.setPrice(invProduct.getPrice());
+		}
+		return p;
+	}
+
+	//消費庫存
 	public static void consume(int productID, int count) {
-		productQuantity[getIndexWithProductID(productID)] -= count;
+		products[getIndexWithProductID(productID)].addQuantity(-count);
 	}
 
 	//是否有這項產品
@@ -40,10 +56,6 @@ public class Inventory {
 		}
 
 		return products[getIndexWithProductID(productID)] != null;
-	}
-
-	public static int getProductQuantityWithProductID(int productID) {
-		return productQuantity[getIndexWithProductID(productID)];
 	}
 
 	public static String getDisplayForTitle() {
@@ -73,7 +85,7 @@ public class Inventory {
 				sb.append("尚未有項");
 			} else {
 				sb.append(Inventory.products[i].getName()).append("  ")
-						.append(productQuantity[i]);
+						.append(products[i].getQuantity());
 			}
 
 			sb.append("\n");
@@ -86,22 +98,18 @@ public class Inventory {
 		return Inventory.products.length;
 	}
 
-	public static int getProductQuantity(int productID) {
-		return Inventory.productQuantity[getIndexWithProductID(productID)];
-	}
-
-	public static Product getProduct(int productID) {
-		return Inventory.products[getIndexWithProductID(productID)];
+	public static int getInventoryQuantity(int productID) {
+		return Inventory.products[getIndexWithProductID(productID)]
+				.getQuantity();
 	}
 
 	//回朔庫存
 	public static void rollback(Order order) {
-		ProductItem[] productItems = order.getProductItems();
+		Product[] productItems = order.getProducts();
 		for (int i = 0; i < order.getItemCount(); i++) {
-			ProductItem productItem = productItems[i];
-			Inventory.productQuantity[getIndexWithProductID(
-					productItem.getProduct().getId())] += productItem
-							.getQuantity();
+			Product productItem = productItems[i];
+			Inventory.products[getIndexWithProductID(productItem.getId())]
+					.addQuantity(productItem.getQuantity());
 		}
 
 	}

@@ -3,31 +3,33 @@ package idv.psi.model;
 import idv.psi.service.Inventory;
 
 public class Order {
-	private static int MAXDISPLAYITEMCOUNT = 10;
-	private Integer orderNumber;//單號
-	private ProductItem[] items;//項目數量
+	private static int MAX_DISPLAY_ITEM_COUNT = 10;//一個訂單 最大項目數
+	private Integer orderID;//單號
+	private Product[] products;//項目/產品
 	private int currentItemPointer;//當前新增項目數量
 
-	private static Integer currentOrderIndex = 1;//目前單號
+	private static Integer currentOrderAutoID = 1;//目前單號
 
 	public Order() {
-		autoNumber();
-		items = new ProductItem[MAXDISPLAYITEMCOUNT];
+		autoID();
+		products = new Product[MAX_DISPLAY_ITEM_COUNT];
 	}
 
-	private void autoNumber() {
-		this.orderNumber = currentOrderIndex;
-		currentOrderIndex++;
+	private void autoID() {
+		this.orderID = currentOrderAutoID;
+		currentOrderAutoID++;
 	}
 
-	public boolean addProductItem(Product product, Integer count) {
-		int productCount = Inventory
-				.getProductQuantityWithProductID(product.getId());
-		if (count > productCount) {
+	public boolean addProductItem(Product product) {
+		//庫存量
+		int inventoryCount = Inventory.getProduct(product.getId())
+				.getQuantity();
+
+		if (product.getQuantity() > inventoryCount) {
 			return false;
 		} else {
-			items[currentItemPointer] = new ProductItem(product, count);
-			Inventory.consume(product.getId(), count);
+			products[currentItemPointer] = product;
+			Inventory.consume(product.getId(), product.getQuantity());
 
 			currentItemPointer++;
 		}
@@ -35,8 +37,8 @@ public class Order {
 		return true;
 	}
 
-	public ProductItem[] getProductItems() {
-		return this.items;
+	public Product[] getProducts() {
+		return this.products;
 	}
 
 	//取得項目數量
@@ -44,12 +46,12 @@ public class Order {
 		return this.currentItemPointer;
 	}
 
-	public Integer getOrderNumber() {
-		return orderNumber;
+	public Integer getOrderID() {
+		return orderID;
 	}
 
-	public void setOrderNumber(Integer number) {
-		this.orderNumber = number;
+	public void setOrderID(Integer number) {
+		this.orderID = number;
 	}
 
 	//取得最後一筆新增的項目
@@ -60,10 +62,10 @@ public class Order {
 
 	public String getItemDisplayWithIndex(int index) {
 		StringBuilder sb = new StringBuilder();
-		ProductItem item = this.items[index];
+		Product item = this.products[index];
 
-		sb.append(index + 1).append(":").append(item.getProduct().getName())
-				.append(" x").append(item.getQuantity());
+		sb.append(index + 1).append(":").append(item.getName()).append(" x")
+				.append(item.getQuantity());
 
 		return sb.toString();
 	}
@@ -71,7 +73,7 @@ public class Order {
 	//取得訂單明細
 	public String getOrderDisplay() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("單號:").append(this.orderNumber).append("\n");
+		sb.append("單號:").append(this.orderID).append("\n");
 
 		int index = 0;
 		int costTotal = 0;
@@ -79,8 +81,8 @@ public class Order {
 			sb.append("  ").append(this.getItemDisplayWithIndex(index))
 					.append("\n");
 
-			ProductItem item = this.items[index];
-			int cost = item.getProduct().getPrice() * item.getQuantity();
+			Product item = this.products[index];
+			int cost = item.getPrice() * item.getQuantity();
 			costTotal += cost;
 			index++;
 		}

@@ -15,12 +15,12 @@ public class Demo {
 		int maxProductCategory = 10;//
 		Inventory.initialize(maxProductCategory);
 		//product id = Inventory 的 products index+1 , 因此需要大於0, 小於或等於 maxProductCategory
-		Product p1 = new Product(1, "沙朗牛排", "嚴選最頂級澳洲和牛", 400);
-		Product p2 = new Product(2, "松阪豬", "整頭豬最珍貴的地方", 320);
-		Product p3 = new Product(3, "脆皮雞排", "外皮煎的香酥脆口，肉汁鮮美不乾硬", 260);
-		Inventory.setProduct(p1, 50);
-		Inventory.setProduct(p2, 30);
-		Inventory.setProduct(p3, 100);
+		Product p1 = new Product(1, "沙朗牛排", "嚴選最頂級澳洲和牛", 400, 50);
+		Product p2 = new Product(2, "松阪豬", "整頭豬最珍貴的地方", 320, 30);
+		Product p3 = new Product(3, "脆皮雞排", "外皮煎的香酥脆口，肉汁鮮美不乾硬", 260, 100);
+		Inventory.setProduct(p1);
+		Inventory.setProduct(p2);
+		Inventory.setProduct(p3);
 
 		//init end
 
@@ -48,11 +48,12 @@ public class Demo {
 					input = 2;
 					continue;
 				}
-				System.out.println(
-						"已選擇 " + Inventory.getProduct(index).getName());
+
+				Product product = Inventory.getProductCopy(index);//取得原型
+				System.out.println("已選擇 " + product.getName());
 				System.out.println();
 				System.out.println(
-						"選擇數量:(" + Inventory.getProductQuantity(index) + ")");
+						"選擇數量:(" + Inventory.getInventoryQuantity(index) + ")");
 				System.out.print("> ");
 				int count = sc.nextInt();
 				if (count <= 0) {
@@ -61,10 +62,10 @@ public class Demo {
 					input = 2;//如同直接到 詢問"是否結帳"
 					continue;
 				}
+				product.setQuantity(count);
 
-				//創建新單
-				Product p = Inventory.getProduct(index);
-				boolean result = order.addProductItem(p, count);
+				//創建新單(order 加入新單)
+				boolean result = order.addProductItem(product);
 				if (!result) {
 					System.out.println("庫存數量不足!");
 					input = 2;//如同直接到 詢問"是否結帳"
@@ -107,6 +108,7 @@ public class Demo {
 
 				//結帳
 			} else if (input == 9) {
+				System.out.println("訂單已送出");
 				System.out.println("訂單明細:");
 				System.out.println(order.getOrderDisplay());
 				System.out.println();
