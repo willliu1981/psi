@@ -2,9 +2,9 @@ package idv.psi.main;
 
 import java.util.Scanner;
 
-import idv.psi.model.Inventory;
 import idv.psi.model.Order;
 import idv.psi.model.Product;
+import idv.psi.service.Inventory;
 
 public class Demo {
 

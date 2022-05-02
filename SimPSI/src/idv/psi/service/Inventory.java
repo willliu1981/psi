@@ -1,4 +1,8 @@
-package idv.psi.model;
+package idv.psi.service;
+
+import idv.psi.model.Order;
+import idv.psi.model.Product;
+import idv.psi.model.ProductItem;
 
 public class Inventory {
 

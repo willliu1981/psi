@@ -1,5 +1,7 @@
 package idv.psi.model;
 
+import idv.psi.service.Inventory;
+
 public class Order {
 	private static int MAXDISPLAYITEMCOUNT = 10;
 	private Integer orderNumber;//單號
